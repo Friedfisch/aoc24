@@ -20,7 +20,9 @@ class PrintQueue {
             if (trim($line) === '') {
                 break;
             }
-            $rules[] = explode('|', trim($line));
+            $j = explode('|', trim($line));
+            array_walk($j, 'intval');
+            $rules[] = $j;
         }
 
         $jobs = [];
@@ -47,7 +49,7 @@ class PrintQueue {
           97,61,53,29,13
           75,29,13
          */
-        $o = new PrintQueue(143);
+        $o = new PrintQueue(123);
         $o->loadFromFile(__DIR__ . '/test.txt');
         return $o;
     }
@@ -61,13 +63,31 @@ class PrintQueue {
     public function run(): int {
         $result = 0;
         foreach ($this->jobs as $job) {
-            if ($this->processJob($job, $this->rules)) {
-                // Take middle number of each result and sum up
-                $result += $job[(count($job) - 1) / 2];
+            if (!$this->processJob($job, $this->rules)) {
+                $newJob = $this->reOrder($job, $this->rules);
+                if (!$this->processJob($newJob, $this->rules)) {
+                    throw new Exception('this is still wrong');
+                }
+                $result += $newJob[(count($newJob) - 1) / 2];
             }
         }
 
         return $result;
+    }
+
+    public function reOrder(array $job, array $rules): array {
+        usort($job, function (int $a, int $b) use ($rules): int {
+            foreach ($rules as $rule) {
+                [$l, $r] = $rule;
+                if ($l == $a && $r == $b) {
+                    return -1;
+                } elseif ($l == $b && $r == $a) {
+                    return 1;
+                }
+            }
+            return 0;
+        });
+        return $job;
     }
 
     public function processJob(array $job, array $rules): bool {

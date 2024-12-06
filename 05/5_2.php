@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/5_1_print.php';
+require_once __DIR__ . '/5_2_print.php';
 
 $o = PrintQueue::test1();
 $result = $o->run();

@@ -1,11 +1,11 @@
 <?php
 
-require_once __DIR__ . '/5_1_print.php';
+require_once __DIR__ . '/6_1_guard.php';
 
-$o = PrintQueue::test1();
+$o = Guard::test1();
 $result = $o->run();
 print_r("Result 1 is $result\n");
 
-$o = PrintQueue::calc();
+$o = Guard::calc();
 $result = $o->run();
 print_r("Result is $result\n");
