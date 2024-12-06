@@ -67,7 +67,7 @@ class Guard {
     }
 
     static public function calc(): Guard {
-        $o = new Guard(null);
+        $o = new Guard(4374);
         $o->loadFromFile(__DIR__ . '/input.txt');
         return $o;
     }
@@ -85,23 +85,23 @@ class Guard {
             }
         }
 
-        $path = [];
+        $path = ["$gx $gy" => 1];
         while (true) {
-            echo "Current: $gx $gy\n";
+            //echo "Current: $gx $gy\n";
             [$tx, $ty] = $dir->forward($gx, $gy);
-            echo "Test: $tx $ty Bounds 0 0 {$this->width} {$this->height}\n";
-            if ($tx < 0 || $ty < 0 || $tx > $this->width || $ty > $this->height) {
-                echo "OOB\n";
+            //echo "Test: $tx $ty Bounds 0 0 {$this->width} {$this->height}\n";
+            if ($tx < 0 || $ty < 0 || $tx >= $this->width || $ty >= $this->height) {
+                //echo "OOB\n";
                 break;
             }
             switch ($this->map[$ty][$tx]) {
                 case '#':
-                    echo "Turn\n";
+                    //echo "Turn\n";
                     $dir = $dir->turnRight($gx, $gy);
                     break;
 
                 default:
-                    echo "Move\n";
+                    //echo "Move\n";
                     [$gx, $gy] = $dir->forward($gx, $gy);
                     $u = "$gx $gy";
                     if (!array_key_exists($u, $path)) {
