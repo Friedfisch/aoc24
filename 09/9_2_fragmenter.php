@@ -30,7 +30,7 @@ class Fragmenter {
     }
 
     static public function calc(): Fragmenter {
-        $o = new Fragmenter(null);
+        $o = new Fragmenter(null); // too low: 85452072118
         $o->loadFromFile(__DIR__ . '/input.txt');
         return $o;
     }
@@ -39,63 +39,99 @@ class Fragmenter {
         if (empty($this->data)) {
             return 0;
         }
-        return 0;
-        /* $extended = [];
-          $free = '.';
-          $no = 0;
-          foreach ($this->data as $idx => $in) {
-          if ($idx % 2 == 0) {
-          for ($i = 0; $i < $in; $i++) {
-          $extended[] = $no;
-          }
-          $no++;
-          } else {
-          for ($i = 0; $i < $in; $i++) {
-          $extended[] = $free;
-          }
-          }
-          }
 
+        $extended = [];
+        $no = -1;
+        foreach ($this->data as $idx => $cnt) {
+            if ($idx % 2 == 0) {
+                $no++;
+                $extended[] = [$no, $cnt];
+            } else {
+                $extended[] = ['.', $cnt];
+            }
+        }
 
-          $firstFree = null;
-          while (true) {
-          //print_r(implode($extended) . PHP_EOL);
-          $nf = $this->nextFree($free, $extended, $firstFree);
-          $lastUsed = $this->lastUsed($free, $extended, $nf);
-          if (!$lastUsed) {
-          break;
-          }
-          $extended[$nf] = $extended[$lastUsed];
-          $extended[$lastUsed] = $free;
-          }
+        while ($no > 0) {
+            $this->draw($extended);
+            $extended = $this->process($extended, $no);
+            $no--;
+            //break;
+        }
 
-          $result = 0;
-          foreach ($extended as $idx => $no) {
-          if ($no === $free) {
-          break;
-          }
-          $result += $idx * $no;
-          }
-          return $result; */
+        $result = 0;
+        $no = -1;
+        foreach ($this->draw($extended) as $idx => $p) {
+            if ($idx % 2 == 0) {
+                $no++;
+            }
+            //echo "$idx ** $p " . PHP_EOL;
+            if ($p === '.') {
+                continue;
+            }
+            $result += $idx * $p;
+        }
+        return $result;
     }
 
-    /* private function nextFree(string $free, array $extended, ?int $firstFree): int {
+    function draw(array $d): array {
+        $s = '';
+        foreach ($d as $p) {
+            for ($i = 0; $i < $p[1]; $i++) {
+                $s .= $p[0];
+            }
+        }
+        echo $s . PHP_EOL;
+        return str_split($s);
+    }
 
-      for ($i = $firstFree ?: 0; $i < count($extended) - 1; $i++) {
-      if ($extended[$i] === $free) {
-      return $i;
-      }
-      }
-      print_r(implode(' ', $extended) . PHP_EOL);
-      throw new Exception('no free blocks');
-      }
+    private function freeSlot(array $extended, int $maxIdx, int $size): ?array {
+        for ($i = 0; $i < $maxIdx; $i++) {
+            if ($extended[$i][0] === '.' && $extended[$i][1] >= $size) {
+                print_r('FREE ' . implode(';', [$i, $extended[$i][1]]) . " REQ $size" . PHP_EOL);
+                return [$i, $extended[$i][1]];
+            }
+        }
 
-      private function lastUsed(string $free, array $extended, int $nextFree): ?int {
-      for ($i = count($extended) - 1; $i > $nextFree; $i--) {
-      if ($extended[$i] !== $free) {
-      return $i;
-      }
-      }
-      return null;
-      } */
+        return null;
+    }
+
+    private function process(array $extended, int $search): array {
+        $searchItem = null;
+        for ($i = count($extended) - 1; $i > 0; $i--) {
+            if ($extended[$i][0] === $search) {
+                $searchItem = [$i, $extended[$i][0], $extended[$i][1]];
+                break;
+            }
+        }
+        if (is_null($searchItem)) {
+            return $extended;
+        }
+        [$from, $c, $size] = $searchItem;
+        [$free, $slotSize] = $this->freeSlot($extended, $i, $size);
+        print_r('DATA ' . implode(';', $searchItem) . " FREE: $free" . PHP_EOL);
+        if (!is_null($free)) {
+            //for ($idx = 0; $idx <= $size; $idx++) {
+            echo "* $search ***** $from ******* $free *********************" . PHP_EOL;
+            //$this->draw($extended);
+            $extended[$from] = ['.', $size];
+            //$this->draw($extended);
+            $extended[$free] = [$c, $size];
+            //$this->draw($extended);
+            //echo "asdfa sdfas df" . PHP_EOL;
+            if ($size < $slotSize) {
+                $empty = ['.', $slotSize - $size];
+                $head = array_slice($extended, 0, $free + 1);
+                $remains = array_slice($extended, $free + 1);
+                $extended = $head;
+                $extended[] = $empty;
+                foreach ($remains as $d) {
+                    $extended[] = $d;
+                }
+                // Insert remaining free slots
+            }
+            $this->draw($extended);
+        }
+
+        return $extended;
+    }
 }
