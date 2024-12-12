@@ -52,7 +52,7 @@ class Fragmenter {
         }
 
         while ($no > 0) {
-            $this->draw($extended);
+            // $this->draw($extended);
             $extended = $this->process($extended, $no);
             $no--;
             //break;
@@ -69,6 +69,7 @@ class Fragmenter {
                 continue;
             }
             $result += $idx * $p;
+            echo "$idx\t$result\t$p\n";
         }
         return $result;
     }
@@ -80,14 +81,14 @@ class Fragmenter {
                 $s .= $p[0];
             }
         }
-        echo $s . PHP_EOL;
+        //echo $s . PHP_EOL;
         return str_split($s);
     }
 
     private function freeSlot(array $extended, int $maxIdx, int $size): ?array {
         for ($i = 0; $i < $maxIdx; $i++) {
             if ($extended[$i][0] === '.' && $extended[$i][1] >= $size) {
-                print_r('FREE ' . implode(';', [$i, $extended[$i][1]]) . " REQ $size" . PHP_EOL);
+                //print_r('FREE ' . implode(';', [$i, $extended[$i][1]]) . " REQ $size" . PHP_EOL);
                 return [$i, $extended[$i][1]];
             }
         }
@@ -108,10 +109,10 @@ class Fragmenter {
         }
         [$from, $c, $size] = $searchItem;
         [$free, $slotSize] = $this->freeSlot($extended, $i, $size);
-        print_r('DATA ' . implode(';', $searchItem) . " FREE: $free" . PHP_EOL);
+        //print_r('DATA ' . implode(';', $searchItem) . " FREE: $free" . PHP_EOL);
         if (!is_null($free)) {
             //for ($idx = 0; $idx <= $size; $idx++) {
-            echo "* $search ***** $from ******* $free *********************" . PHP_EOL;
+            //  echo "* $search ***** $from ******* $free *********************" . PHP_EOL;
             //$this->draw($extended);
             $extended[$from] = ['.', $size];
             //$this->draw($extended);
@@ -129,7 +130,7 @@ class Fragmenter {
                 }
                 // Insert remaining free slots
             }
-            $this->draw($extended);
+            //$this->draw($extended);
         }
 
         return $extended;
