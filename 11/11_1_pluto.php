@@ -33,37 +33,43 @@ class Pluto {
         return $o;
     }
 
-    public function run($totalBlinks): int {
+    public function run($blinks): int {
         if (empty($this->map)) {
             return 0;
         }
-        $stones = $this->map;
-        $blinks = $totalBlinks;
-        while ($blinks > 0) {
-            print_r("$blinks ");
-            $tmp = [];
-            //print_r("#$blinks:\t" . implode(' ', $stones) . PHP_EOL);
-            foreach ($stones as $stone) {
-                if ($stone == 0) {
-                    $tmp[] = 1;
-                    continue;
-                }
+        $r = 0;
+        echo count($this->map) . " to process \n";
+        foreach ($this->map as $idx => $stone) {
+            $r += $this->processStone($stone, $blinks);
+            echo "$idx $r\n";
+        }
+        return $r;
 
-                $digits = strlen($stone);
-                if ($digits % 2 == 0) {
-                    $tmp[] = 0 + substr($stone, 0, $digits / 2);
-                    $tmp[] = 0 + substr($stone, $digits / 2);
-                    continue;
-                }
+        // 1 2024 1 0 9 9 2021976.
+    }
 
+    private function processStone($stone, $blinks): int {
+        //echo "$stone $blinks\n";
+        if ($blinks == 0) {
+            return 1;
+        }
+
+        $tmp = [];
+        if ($stone == 0) {
+            $tmp[] = 1;
+        } else {
+            $digits = strlen($stone);
+            if ($digits % 2 == 0) {
+                $tmp[] = 0 + substr($stone, 0, $digits / 2);
+                $tmp[] = 0 + substr($stone, $digits / 2);
+            } else {
                 $tmp[] = $stone * 2024;
             }
-            $stones = $tmp;
-            $blinks--;
         }
-        // 1 2024 1 0 9 9 2021976.
-        //print_r("#$blinks:\t" . implode(' ', $stones) . PHP_EOL);
-
-        return count($stones);
+        $res = 0;
+        foreach ($tmp as $v) {
+            $res += $this->processStone($v, $blinks - 1);
+        }
+        return $res;
     }
 }
