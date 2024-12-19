@@ -1,6 +1,7 @@
 package day11
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -38,18 +39,32 @@ func Run(in []int, blinks int) int {
 	}
 
 	var x Data
-	cache, res := make(map[Data][]Data), 0
+	var c []Data
+	cache, res := make(map[int][]int), 0
 	for _, d := range wb {
 		p := []Data{d}
-		var c []Data
 		for len(p) != 0 {
 			x, p = p[0], p[1:]
-			cv, err := cache[x]
+			cv, err := cache[x.number]
 			if err {
-				c = cv
+				fmt.Printf("cache hit %v %v\n", x.number, cv)
+				c = []Data{}
+				if x.blinks > 0 {
+					for _, r := range cv {
+						c = append(c, Data{number: r, blinks: x.blinks-1})
+					}
+				}
 			} else {
 				c = process(x)
-				cache[x] = c
+				tmp := []int{}
+				for _, r := range c {
+					if r.blinks > 0 {
+						tmp = append(tmp, r.number)
+					}
+				}
+				if len(tmp) > 0 {
+					cache[x.number] = tmp;
+				}
 			}
 
 			if len(c) == 0 {
