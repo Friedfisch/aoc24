@@ -88,7 +88,7 @@ class Graph {
     }
 
     static public function calc(): Graph {
-        $o = new Graph(null);
+        $o = new Graph(1058);
         $o->loadFromFile(__DIR__ . '/input.txt');
         return $o;
     }

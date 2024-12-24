@@ -1,79 +1,44 @@
 package day11
 
 import (
-	"fmt"
 	"strconv"
 )
 
-type Data struct {
-	number int
-	blinks int
+var cache map[string]int
+
+func c(i, n int) string {
+	return strconv.Itoa(i) + "_" + strconv.Itoa(n)
 }
 
-func process(d Data) (n []Data) {
-	if d.blinks == 0 {
-		return []Data{};
+func process(number int, iter int) (r int) {
+	if iter == 0 {
+		return 1;
 	}
-	nb := d.blinks -1;
-
-	if d.number == 0 {
-		n = append(n, Data{number: 1, blinks: nb})
+	r, err := cache[c(iter, number)]
+	if (err) {
+		return
+	}
+	if number == 0 {
+		r = process(1, iter - 1)
 	} else {
-		s := strconv.Itoa(d.number)
+		s := strconv.Itoa(number)
 		if len(s) % 2 == 0 {
 			h :=  len(s) / 2
-			l, _ := strconv.Atoi(s[:h])
-			r, _ := strconv.Atoi(s[h:])
-			n = append(n, Data{number: l,blinks: nb}, Data{number: r, blinks: nb})
+			lv, _ := strconv.Atoi(s[:h])
+			rv, _ := strconv.Atoi(s[h:])
+			r = process(lv, iter - 1) + process(rv, iter - 1)
 		} else {
-			n = append(n, Data{number: d.number * 2024, blinks: nb})
+			r = process(number * 2024, iter - 1)
 		}
 	}
+	cache[c(iter, number)] = r
 	return
 }
 
-func Run(in []int, blinks int) int {
-	var wb []Data
-	for _, v := range in {
-		wb = append(wb, Data{number: v, blinks: blinks})
+func Run(in []int, blinks int) (r int) {
+	cache = make(map[string]int)
+	for _, d := range in {
+		r += process(d, blinks)
 	}
-
-	var x Data
-	var c []Data
-	cache, res := make(map[int][]int), 0
-	for _, d := range wb {
-		p := []Data{d}
-		for len(p) != 0 {
-			x, p = p[0], p[1:]
-			cv, err := cache[x.number]
-			if err {
-				fmt.Printf("cache hit %v %v\n", x.number, cv)
-				c = []Data{}
-				if x.blinks > 0 {
-					for _, r := range cv {
-						c = append(c, Data{number: r, blinks: x.blinks-1})
-					}
-				}
-			} else {
-				c = process(x)
-				tmp := []int{}
-				for _, r := range c {
-					if r.blinks > 0 {
-						tmp = append(tmp, r.number)
-					}
-				}
-				if len(tmp) > 0 {
-					cache[x.number] = tmp;
-				}
-			}
-
-			if len(c) == 0 {
-				res ++
-			} else {
-				//fmt.Printf("C:%v\n", c)
-				p = append(p, c...)
-			}
-		}
-	}
-	return res
+	return r
 }
